@@ -1,0 +1,70 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [hotel-network]
+
+  temporal:
+    image: temporalio/auto-setup:latest
+    depends_on: [postgres]
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgres
+    ports:
+      - "7233:7233"
+    networks: [hotel-network]
+
+  temporal-ui:
+    image: temporalio/ui:latest
+    depends_on: [temporal]
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    ports:
+      - "8080:8080"
+    networks: [hotel-network]
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks: [hotel-network]
+
+  app:
+    build: .
+    depends_on: [temporal, redis]
+    environment:
+      - PORT=3000
+      - TEMPORAL_ADDRESS=temporal:7233
+      - REDIS_URL=redis://redis:6379
+      - APP_BASE_URL=http://app:3000
+    ports:
+      - "3000:3000"
+    networks: [hotel-network]
+
+  worker:
+    build: .
+    command: ["node", "dist/worker.js"]
+    depends_on: [temporal, redis, app]
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - REDIS_URL=redis://redis:6379
+      - APP_BASE_URL=http://app:3000
+    networks: [hotel-network]
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  hotel-network:
+    driver: bridge

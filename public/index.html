@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hotel Offer Orchestrator</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="nav"><div class="brand"><span class="brand-mark">H</span><span>Hotel Offer Orchestrator</span></div><a href="http://localhost:8080" target="_blank" rel="noreferrer">Temporal UI ↗</a></div>
+    <div class="hero-copy"><p class="eyebrow">TEMPORAL + REDIS HOTEL AGGREGATION</p><h1>Find the best supplier offer,<br/>without the duplicates.</h1><p>Search a city, compare overlapping hotel inventory from two mock suppliers, and filter the final list by price.</p></div>
+  </header>
+  <main>
+    <section class="search-card">
+      <form id="searchForm">
+        <label>City<input id="city" value="delhi" placeholder="e.g. delhi" required /></label>
+        <label>Minimum price<input id="minPrice" type="number" min="0" placeholder="Any" /></label>
+        <label>Maximum price<input id="maxPrice" type="number" min="0" placeholder="Any" /></label>
+        <button type="submit" id="searchBtn">Search hotels</button>
+      </form>
+      <div id="message" class="message" aria-live="polite"></div>
+    </section>
+
+    <section class="summary" id="summary" hidden>
+      <div><span id="hotelCount">0</span><small>best offers</small></div>
+      <div><span id="lowestPrice">—</span><small>lowest price</small></div>
+      <div><span id="supplierCount">0</span><small>suppliers selected</small></div>
+    </section>
+
+    <section class="results-head"><div><p class="eyebrow dark">RESULTS</p><h2>Best available offers</h2></div><button class="ghost" id="refreshBtn" type="button">Refresh</button></section>
+    <section id="results" class="hotel-grid"><div class="empty">Search for a city to load hotel offers.</div></section>
+
+    <section class="how"><p class="eyebrow dark">HOW IT WORKS</p><h2>One request, coordinated end to end.</h2><div class="steps">
+      <article><b>01</b><h3>Parallel supplier calls</h3><p>Temporal activities request Supplier A and Supplier B concurrently.</p></article>
+      <article><b>02</b><h3>Best-price selection</h3><p>Hotel names are normalized and duplicate listings keep the cheaper price.</p></article>
+      <article><b>03</b><h3>Redis price filtering</h3><p>The final list is saved as a Redis Sorted Set and range queries run by score.</p></article>
+    </div></section>
+
+    <section class="health-card"><div><p class="eyebrow dark">SYSTEM HEALTH</p><h2>Supplier availability</h2></div><div id="health"><span class="pill neutral">Checking…</span></div></section>
+  </main>
+  <footer>Hotel Offer Orchestrator · Node.js · TypeScript · Express · Temporal · Redis</footer>
+  <script src="/app.js"></script>
+</body>
+</html>
