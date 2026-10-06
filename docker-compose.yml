@@ -33,8 +33,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
     volumes:
       - redis-data:/data
     networks: [hotel-network]
@@ -54,6 +53,7 @@ services:
   worker:
     build: .
     command: ["node", "dist/worker.js"]
+    restart: on-failure
     depends_on: [temporal, redis, app]
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
